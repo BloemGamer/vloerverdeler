@@ -1,12 +1,9 @@
 #include "OneWire.h"
 #include "DallasTemperature.h"
+#include "settings.h"
 
-#define AMOUNT_PINS 2
-#define RESOLUTION 9
-#define SLEEP_TIME_S 1.0
-
-uint8_t wire_pins[AMOUNT_PINS] = {25, 26};
-int device_count[AMOUNT_PINS] = { 0 };
+uint8_t wire_pins[AMOUNT_PINS] = {WIRE_PINS};
+int device_count[AMOUNT_PINS] = {DEVICE_COUNT};
 char** device_addresses[AMOUNT_PINS];
 
 
