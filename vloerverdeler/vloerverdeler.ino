@@ -1,15 +1,15 @@
 #include "OneWire.h"
 #include "DallasTemperature.h"
 #include "settings.h"
+#include "make_yaml.h"
+#include <istream>
 
 uint8_t wire_pins[AMOUNT_PINS] = {WIRE_PINS};
-int device_count[AMOUNT_PINS] = {DEVICE_COUNT};
-char** device_addresses[AMOUNT_PINS];
-
+int device_count[AMOUNT_PINS] = { 0 };
+byte** device_addresses[AMOUNT_PINS];
 
 OneWire wires[AMOUNT_PINS];
 DallasTemperature sensors[AMOUNT_PINS];
-
 
 void setup()
 {
@@ -38,7 +38,16 @@ void setup()
 
         if(device_count[p] > 0)
         {
-            device_addresses[p] = (char**)malloc(device_count[p] * sizeof(char*));
+            device_addresses[p] = (byte**)malloc(device_count[p] * sizeof(char*));
+        #ifdef MAKE_YAML
+            correction_sensors[p] = (double*)malloc(device_count[p] * sizeof(double));
+
+            for(int i = 0; i < 100; i++)
+            {
+                measurements[i][p] = (double*)malloc(device_count[p] * sizeof(double));
+            }
+        #endif // MAKE_YAML
+
             if(device_addresses[p] == NULL)
             {
                 Serial.printf("\nfailed on %d", p);
@@ -47,7 +56,7 @@ void setup()
             {
                 
                 sensors[p].getAddress(device_address, i);
-                device_addresses[p][i] = device_address_to_char(device_address);
+                device_addresses[p][i] = (byte*)device_address_to_char(device_address);
                 if(device_addresses[p][i] == NULL)
                 {
                     Serial.printf("\nfailed on %d, %d", p, i);
@@ -74,10 +83,14 @@ void setup()
     }
     Serial.printf("Resolution: %d bits\n", RESOLUTION);
     Serial.printf("Update Interval: %.01lf\n", (double)SLEEP_TIME_S);
+#ifdef MAKE_YAML
+    print_yaml();
+#endif
 }
 
 void loop()
 {
+#ifndef MAKE_YAML
     for(int p = 0; p < AMOUNT_PINS; p++)
     {
         sensors[p].requestTemperatures();
@@ -88,6 +101,7 @@ void loop()
         // Serial.println();
     }
     delay((uint32_t)(1000 * SLEEP_TIME_S)); // replace with a good sleep function for longer delay times
+#endif
 }
 
 char* device_address_to_char(DeviceAddress deviceAddress)
