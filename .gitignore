@@ -15,3 +15,4 @@ test*
 debug
 __pycache__
 *.yaml
+private_settings.h
