@@ -152,7 +152,7 @@ void print_yaml(void)
             Serial.printf("- platform: dallas_temp\n");
             Serial.printf("  one_wire_id: pin%d\n", wire_pins[p]);
             Serial.printf("  address: 0x%s\n", device_addresses[p][i].Char);
-            Serial.printf("  name: ${group:_%d_sensor_%d}\n", group, sensor);
+            Serial.printf("  name: ${group_%d_sensor_%d}\n", group, sensor);
             Serial.printf("  unit_of_measurement: \"°C\"\n");
             Serial.printf("  icon: \"mdi:thermometer\"\n");
             Serial.printf("  device_class: \"temperature\"\n");
