@@ -109,7 +109,7 @@ struct CharByte device_address_to_char(DeviceAddress deviceAddress)
 {
     struct CharByte address;
     address.Char = (char*)malloc((2 + (8 * 2) + 1) * sizeof(char));
-    address.Hex = (byalloc(8 * sizeof(byte));
+    address.Hex = (byte*)malloc(8 * sizeof(byte));
     char tmp[3];
 
     memset(address.Char, 0, (2 + (8 * 2) + 1) * sizeof(char));
