@@ -2,11 +2,11 @@
 #include "DallasTemperature.h"
 #include "settings.h"
 #include "make_yaml.h"
-#include <istream>
 
 uint8_t wire_pins[AMOUNT_PINS] = {WIRE_PINS};
 int device_count[AMOUNT_PINS] = { 0 };
-byte** device_addresses[AMOUNT_PINS];
+
+struct CharByte* device_addresses[AMOUNT_PINS];
 
 OneWire wires[AMOUNT_PINS];
 DallasTemperature sensors[AMOUNT_PINS];
@@ -35,14 +35,14 @@ void setup()
         sensors[p].begin();
         device_count[p] = sensors[p].getDeviceCount();
         sensors[p].setResolution(RESOLUTION);        
-
         if(device_count[p] > 0)
         {
-            device_addresses[p] = (byte**)malloc(device_count[p] * sizeof(char*));
+            device_addresses[p] = (CharByte*)malloc(device_count[p] * sizeof(CharByte));
         #ifdef MAKE_YAML
             correction_sensors[p] = (double*)malloc(device_count[p] * sizeof(double));
+            memset((void*)correction_sensors[p], 0, device_count[p] * sizeof(double));
 
-            for(int i = 0; i < 100; i++)
+            for(int i = 0; i < AMOUNT_MEASUREMENTS; i++)
             {
                 measurements[i][p] = (double*)malloc(device_count[p] * sizeof(double));
             }
@@ -56,8 +56,8 @@ void setup()
             {
                 
                 sensors[p].getAddress(device_address, i);
-                device_addresses[p][i] = (byte*)device_address_to_char(device_address);
-                if(device_addresses[p][i] == NULL)
+                device_addresses[p][i] = device_address_to_char(device_address);
+                if(device_addresses[p][i].Char == NULL)
                 {
                     Serial.printf("\nfailed on %d, %d", p, i);
                 }
@@ -76,7 +76,7 @@ void setup()
         }
         for(int i = 0; i < device_count[p]; i++)
         {
-            Serial.printf("\t\tAddress: 0x%s\n", device_addresses[p][i]);
+            Serial.printf("\t\tAddress: 0x%s\n", device_addresses[p][i].Char);
         }
         
         
@@ -85,6 +85,7 @@ void setup()
     Serial.printf("Update Interval: %.01lf\n", (double)SLEEP_TIME_S);
 #ifdef MAKE_YAML
     print_yaml();
+    Serial.printf("\nDONE");
 #endif
 }
 
@@ -96,7 +97,7 @@ void loop()
         sensors[p].requestTemperatures();
         for (int i = 0;  i < device_count[p];  i++)
         {
-            Serial.printf("Pin %d, sensor %d : %.2f %sC 0x%s\n", wire_pins[p], i + 1, sensors[p].getTempCByIndex(i), "\xC2\xB0", device_addresses[p][i]);
+            Serial.printf("Pin %d, sensor %d : %.2f %sC 0x%s\n", wire_pins[p], i + 1, sensors[p].getTempCByIndex(i), "\xC2\xB0", device_addresses[p][i].Char);
         }
         // Serial.println();
     }
@@ -104,16 +105,20 @@ void loop()
 #endif
 }
 
-char* device_address_to_char(DeviceAddress deviceAddress)
+struct CharByte device_address_to_char(DeviceAddress deviceAddress)
 {
-    char* address = (char*)malloc((2 + (8 * 2) + 1) * sizeof(char));
+    struct CharByte address;
+    address.Char = (char*)malloc((2 + (8 * 2) + 1) * sizeof(char));
+    address.Hex = (byalloc(8 * sizeof(byte));
     char tmp[3];
 
-    memset(address, 0, (2 + (8 * 2) + 1) * sizeof(char));
+    memset(address.Char, 0, (2 + (8 * 2) + 1) * sizeof(char));
+    memset(address.Hex, 0, 8 * sizeof(char));
     for(int8_t i = 7; i >= 0; i--)
     {
-        sprintf(tmp, "%02X", deviceAddress[i]);
-        strncat(address, tmp, 2);
+        address.Hex[i] = deviceAddress[i];
+        sprintf(tmp, "%02x", deviceAddress[i]);
+        strncat(address.Char, tmp, 2);
     }
     return address;
 }
