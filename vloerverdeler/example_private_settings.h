@@ -1,3 +1,3 @@
 #define WIFI_NAME "XXX"
 #define WIFI_PASSWORD "XXX"
-#define ENCRYPTION "XXX"
+#define ENCRYPTION_KEY "XXX"
