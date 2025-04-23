@@ -3,7 +3,7 @@ import serial
 
 PORT = sys.argv[1]
 BAUD_RATE = 9600
-STOP_KEYWORD = "DONE"
+STOP_KEYWORD = "_end_serial_port_"
 
 def monitor_serial(port, baudrate, stop_keyword):
     try:

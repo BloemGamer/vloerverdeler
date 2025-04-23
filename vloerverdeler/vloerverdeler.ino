@@ -85,7 +85,7 @@ void setup()
     Serial.printf("Update Interval: %.01lf\n", (double)SLEEP_TIME_S);
 #ifdef MAKE_YAML
     print_yaml();
-    Serial.printf("\nDONE");
+    Serial.printf("\n_end_serial_port_");
 #endif
 }
 
