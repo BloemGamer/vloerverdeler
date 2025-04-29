@@ -79,11 +79,11 @@ void print_yaml(void)
     Serial.printf("yaml_start\n");
 
     Serial.printf("substitutions:\n");
-    Serial.printf("  wifi_name: %s\n", WIFI_NAME);
-    Serial.printf("  wifi_password: %s\n", WIFI_PASSWORD);
+    Serial.printf("  wifi_name: \"%s\"\n", WIFI_NAME);
+    Serial.printf("  wifi_password: \"%s\"\n", WIFI_PASSWORD);
     Serial.printf("  encryption_key: \"%s\"\n", ENCRYPTION_KEY);
-    Serial.printf("  esp32_name: esphome-web-6be034\n");
-    Serial.printf("  esp32_friendly_name: vloerverwarming\n");
+    Serial.printf("  esp32_name: \"esphome-web-6be034\"\n");
+    Serial.printf("  esp32_friendly_name: \"vloerverwarming\"\n");
 
     group = 0;
     for(int p = 0; p < AMOUNT_PINS; p++)
