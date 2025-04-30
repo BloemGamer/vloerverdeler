@@ -59,7 +59,7 @@ static void fix_data_yaml(void)
             if(right)
             {
                 sum /= right;
-                correction_sensors[p][i] = sum - aver;
+                correction_sensors[p][i] = -(sum - aver);
                 Serial.printf("%0.2lf, %0.2lf, HEX: %s\n", sum, aver, device_addresses[p][i].Char);
             }
         }
@@ -71,29 +71,27 @@ static void fix_data_yaml(void)
 // :%s/Serial.printf("\\n");/Serial.printf("\\n");\r
 void print_yaml(void)
 {
-    int group;
-    int sensor;
     fix_data_yaml();
 
     Serial.println("\n\n\n\n\n\n\n\n\n\n");
     Serial.printf("yaml_start\n");
 
     Serial.printf("substitutions:\n");
-    Serial.printf("  wifi_name: \"%s\"\n", WIFI_NAME);
-    Serial.printf("  wifi_password: \"%s\"\n", WIFI_PASSWORD);
-    Serial.printf("  encryption_key: \"%s\"\n", ENCRYPTION_KEY);
+
+    Serial.printf((strncmp(WIFI_NAME,"!secret",7) == 0 ? "  wifi_name: %s\n" : "  wifi_name: \"%s\"\n"), WIFI_NAME);
+    Serial.printf((strncmp(WIFI_PASSWORD,"!secret",7) == 0 ? "  wifi_password: %s\n" : "  wifi_password: \"%s\"\n"), WIFI_PASSWORD);
+    Serial.printf((strncmp(ENCRYPTION_KEY,"!secret",7) == 0 ? "  encryption_key: %s\n" : "  encryption_key: \"%s\"\n"), ENCRYPTION_KEY);
+    
     Serial.printf("  esp32_name: \"esphome-web-6be034\"\n");
     Serial.printf("  esp32_friendly_name: \"vloerverwarming\"\n");
+    Serial.printf("\n");
 
-    group = 0;
     for(int p = 0; p < AMOUNT_PINS; p++)
     {
-        group++;
-        sensor = 0;
         for(int i = 0;  i < device_count[p];  i++)
         {
-            sensor++;
-            Serial.printf("  group_%d_sensor_%d: \"%d%d\"\n", group, sensor, group, sensor);
+            Serial.printf("  name_group_%d_sensor_%c: \"one_wire_%d%c\"\n", p + 1, i + 'a', p + 1, i + 'a');
+            Serial.printf("  corr_group_%d_sensor_%c: \"%.2lf\"\n", p + 1, i + 'a', correction_sensors[p][i]);
         }
     }
     Serial.printf("\n");
@@ -140,19 +138,15 @@ void print_yaml(void)
     }
     Serial.printf("\n");
 
-    group = 0;
     Serial.printf("sensor:\n");
     for(int p = 0; p < AMOUNT_PINS; p++)
     {
-        group++;
-        sensor = 0;
         for (int i = 0;  i < device_count[p];  i++)
         {
-            sensor++;
             Serial.printf("- platform: dallas_temp\n");
             Serial.printf("  one_wire_id: pin%d\n", wire_pins[p]);
             Serial.printf("  address: 0x%s\n", device_addresses[p][i].Char);
-            Serial.printf("  name: ${group_%d_sensor_%d}\n", group, sensor);
+            Serial.printf("  name: ${name_group_%d_sensor_%c}\n", p + 1, i + 'a');
             Serial.printf("  unit_of_measurement: \"°C\"\n");
             Serial.printf("  icon: \"mdi:thermometer\"\n");
             Serial.printf("  device_class: \"temperature\"\n");
@@ -161,7 +155,7 @@ void print_yaml(void)
             Serial.printf("  update_interval: %s\n", DELAY_TIME_YAML);
             Serial.printf("  resolution: %d\n", RESOLUTION);
             Serial.printf("  filters:\n");
-            Serial.printf("  - offset: %.2lf\n", correction_sensors[p][i]);
+            Serial.printf("  - offset: ${corr_group_%d_sensor_%c}\n", p + 1, i + 'a');
             Serial.printf("  - clamp:\n");
             Serial.printf("      min_value: -20\n");
             Serial.printf("      max_value: 75\n");
@@ -172,7 +166,6 @@ void print_yaml(void)
             Serial.printf("        - delay: 0.2s\n");
             Serial.printf("        - output.turn_off: o_blue_led\n");
             Serial.printf("        - delay: 0.1s\n");
-            Serial.printf("        - light.turn_off: blue_led\n");
             Serial.printf("\n");
         }
     }
