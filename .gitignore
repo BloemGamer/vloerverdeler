@@ -17,3 +17,4 @@ __pycache__
 *.yaml
 vloerverdeler/private_settings.h
 arduino*
+tmux.sh
