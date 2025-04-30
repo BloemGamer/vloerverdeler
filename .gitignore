@@ -16,3 +16,4 @@ debug
 __pycache__
 *.yaml
 vloerverdeler/private_settings.h
+arduino*
